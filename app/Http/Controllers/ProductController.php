@@ -91,15 +91,15 @@ class ProductController extends Controller
      * @param  \App\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(ProductRequest $request,$id)
+    public function update(Request $request, Product $product)
     {
-        $productEdit = Product::find($id);
-        $productEdit->name = $request->name;
-        $productEdit->stock = $request->stock;
-        $productEdit->price = $request->price;
-        $productEdit->detail = $request->detail;
-        $productEdit->discount = $request->discount;
-        $productEdit->save();
+        $request['detail'] = $request->description;
+        unset($request['description']);
+        $product->update($request->all());
+
+        return response([
+            'data' => new ProductResource($product)
+        ], 200);
     }
 
     /**
