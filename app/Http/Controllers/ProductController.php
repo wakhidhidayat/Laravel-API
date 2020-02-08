@@ -6,6 +6,8 @@ use App\Product;
 use Illuminate\Http\Request;
 use App\Http\Resources\Product\ProductResource;
 use App\Http\Resources\Product\ProductCollection;
+use App\Http\Requests\ProductRequest;
+use Illuminate\Support\Facades\Gate;
 
 class ProductController extends Controller
 {
@@ -14,6 +16,16 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function __construct() {
+        $this->middleware('auth:api')->except('index','show');
+        
+        // $this->middleware(function($request, $next) {
+        //     if(Gate::allows('manage-products')) return $next($request);
+        //     \abort(403, 'Access Forbiden');
+        // })->except('index','show');
+    }
+
     public function index()
     {
         return ProductCollection::collection(Product::all());
@@ -35,9 +47,19 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
-        //
+        $product = new Product;
+        $product->name = $request->name;
+        $product->stock = $request->stock;
+        $product->price = $request->price;
+        $product->detail = $request->detail;
+        $product->discount = $request->discount;
+        $product->save();
+
+        return response([
+            'data' => new ProductResource($product)
+        ], 201);
     }
 
     /**
@@ -69,9 +91,15 @@ class ProductController extends Controller
      * @param  \App\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Product $product)
+    public function update(ProductRequest $request,$id)
     {
-        //
+        $productEdit = Product::find($id);
+        $productEdit->name = $request->name;
+        $productEdit->stock = $request->stock;
+        $productEdit->price = $request->price;
+        $productEdit->detail = $request->detail;
+        $productEdit->discount = $request->discount;
+        $productEdit->save();
     }
 
     /**
