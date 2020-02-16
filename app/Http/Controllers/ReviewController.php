@@ -6,6 +6,8 @@ use App\Review;
 use App\Product;
 use App\Http\Resources\ReviewResource;
 use Illuminate\Http\Request;
+use App\Http\Requests\ReviewRequest;
+use Illuminate\Support\Facades\Auth;
 
 class ReviewController extends Controller
 {
@@ -18,8 +20,6 @@ class ReviewController extends Controller
     {
         $reviews =  Review::all()->where('product_id',$id);
         return ReviewResource::collection($reviews);
-
-        // return ReviewResource::collection($product->review);
     }
 
     /**
@@ -38,9 +38,18 @@ class ReviewController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ReviewRequest $request, $productId)
     {
-        //
+        $review = new Review;
+        $review->review = $request->review;
+        $review->star = $request->star;
+        $review->user_id = Auth::id();
+        $review->product_id = $productId;
+        $review->save();
+
+        return response([
+            'data' => new ReviewResource($review)
+        ], 201);
     }
 
     /**
@@ -72,9 +81,14 @@ class ReviewController extends Controller
      * @param  \App\Review  $review
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Review $review)
+    public function update(ReviewRequest $request, $id)
     {
-        //
+        $review = Review::findOrFail($id);
+        $review->update($request->all());
+
+        return response([
+            'data' => new ReviewResource($review)
+        ], 200);
     }
 
     /**
@@ -85,6 +99,8 @@ class ReviewController extends Controller
      */
     public function destroy(Review $review)
     {
-        //
+        $review->delete();
+
+        return response(null, 204);
     }
 }
