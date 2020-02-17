@@ -6,11 +6,12 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::apiResource('/products','ProductController');
+Route::apiResource('/v1/products','ProductController');
 
-Route::group(['prefix' => '/products'], function() {
+Route::group(['prefix' => '/v1/products'], function() {
     Route::apiResource('/{productId}/reviews', 'ReviewController');
 });
 
-Route::post('/register', 'UserController@register');
-Route::post('/login','UserController@login');
+Route::post('/v1/register', 'AuthController@register');
+Route::post('/v1/login','AuthController@login');
+Route::post('/v1/logout','AuthController@logout');

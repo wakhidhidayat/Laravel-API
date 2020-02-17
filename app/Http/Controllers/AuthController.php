@@ -9,10 +9,9 @@ use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Auth;
 
-class UserController extends Controller
+class AuthController extends Controller
 {
-    public $successStatus = 200;
-    public $unauthorizedStatus = 401;
+    public $statusCode = 500;
     public $status = "error";
     public $message = "";
     public $data = null;
@@ -24,20 +23,24 @@ class UserController extends Controller
         if($user) {
             if(\Hash::check($request->password, $user->password)) {
                 $this->data['token'] = $user->createToken('nApp')->accessToken;
+                $this->data['name'] = $user->name;
                 $this->status = "success";
                 $this->message = "Login success";
+                $this->statusCode = 200;
             } else {
                 $this->message = "Login failed, email and password doesn't match";
+                $this->statusCode = 401;
             }
-        } else{
+        } else {
             $this->message = "Login failed, your email is wrong";
+            $this->statusCode = 401;
         }
 
         return response()->json([
             'status' => $this->status,
             'message' => $this->message,
             'data' => $this->data
-        ], $this->successStatus);
+        ], $this->statusCode);
     }
 
     public function register(RegisterRequest $request) 
@@ -49,12 +52,31 @@ class UserController extends Controller
         $user->role_id = 2;
         $user->save();
 
-        $success['token'] = $user->createToken('nApp')->accessToken;
-        $success['name'] = $user->name;
+        $this->data['token'] = $user->createToken('nApp')->accessToken;
+        $this->data['name'] = $user->name;
+        $this->status = 201;
+        $this->message = "Register Success";
 
         return response()->json([
-            'success' => $success,
-        ],$this->successStatus);
+            'status' => $this->status,
+            'message' => $this->message,
+            'data' => $this->data
+        ],$this->statusCode);
 
+    }
+
+    public function logout()
+    {
+        $user = Auth::user()->token();
+        $user->revoke();
+        $this->message = "Logout Success";
+        $this->status = "success";
+        $this->statusCode = 204;
+
+        return response()->json([
+            'status' => $this->status,
+            'message' => $this->message,
+
+        ], $this->statusCode);
     }
 }
