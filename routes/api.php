@@ -11,3 +11,8 @@ Route::apiResource('/products','ProductController');
 Route::group(['prefix' => '/products'], function() {
     Route::apiResource('/{productId}/reviews', 'ReviewController');
 });
+
+Route::post('/register', 'UserController@register');
+Route::post('/login','UserController@login');
+
+Route::apiResource('/users','UserController');

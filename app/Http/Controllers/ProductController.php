@@ -20,10 +20,10 @@ class ProductController extends Controller
     public function __construct() {
         $this->middleware('auth:api')->except('index','show');
         
-        // $this->middleware(function($request, $next) {
-        //     if(Gate::allows('manage-products')) return $next($request);
-        //     \abort(403, 'Access Forbiden');
-        // })->except('index','show');
+        $this->middleware(function($request, $next) {
+            if(Gate::allows('manage-products')) return $next($request);
+            abort(403, 'Access Forbiden');
+        })->except('index','show');
     }
 
     public function index()
