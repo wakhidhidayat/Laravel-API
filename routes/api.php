@@ -14,5 +14,3 @@ Route::group(['prefix' => '/products'], function() {
 
 Route::post('/register', 'UserController@register');
 Route::post('/login','UserController@login');
-
-Route::apiResource('/users','UserController');

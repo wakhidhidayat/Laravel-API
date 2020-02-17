@@ -4,6 +4,13 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\QueryException;
+use Illuminate\Auth\AuthenticationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedException;
+
 
 class Handler extends ExceptionHandler
 {
@@ -50,6 +57,64 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        return parent::render($request, $exception);
+        $debug = config('app.debug');
+        $message = "";
+        $statusCode = 500;
+
+        if($exception instanceof ModelNotFoundException) {
+            $message = "Resource not found";
+            $statusCode = 404;
+        } elseif($exception instanceof NotFoundHttpException) {
+            $message = "Endpoint not found";
+            $statusCode = 404;
+        } elseif($exception instanceof MethodNotAllowedHttpException) {
+            $message = "Method not allowed";
+            $statusCode = 405;
+        } elseif($exception instanceof ValidationException) {
+            $validationErrors = $exception->validator->errors()->getMessages();
+            $validationErrors = array_map(function($error) {
+                return array_map(function($message) {
+                    return $message;
+                }, $error);
+            }, $validationErrors);
+            $message = $validationErrors;
+            $statusCode = 405;
+        } elseif($exception instanceof QueryException) {
+            if($debug) {
+                $message = $exception->getMessage();
+            } else {
+                $message = "Query failed to execute";
+            }
+            $statusCode = 500;
+        }
+
+        $rendered = parent::render($request, $exception);
+        $statusCode = $rendered->getStatusCode();
+        if(empty($message)) {
+            $message = $exception->getMessage();
+        }
+
+        $errors = [];
+
+        if($debug) {
+            $errors['exception'] = get_class($exception);
+            $errors['trace'] = explode("\n", $exception->getTraceAsString());
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => $message,
+            'data' => null,
+            'errors' => $errors
+        ], $statusCode);
+
+    }
+
+    protected function unauthentitaced($request, AuthenticationException $exception) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Unauthenticated',
+            'data' => null
+        ], 401);
     }
 }
