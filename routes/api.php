@@ -14,4 +14,4 @@ Route::group(['prefix' => '/v1/products'], function() {
 
 Route::post('/v1/register', 'AuthController@register');
 Route::post('/v1/login','AuthController@login');
-Route::post('/v1/logout','AuthController@logout');
+Route::post('/v1/logout','AuthController@logout')->middleware('auth:api');

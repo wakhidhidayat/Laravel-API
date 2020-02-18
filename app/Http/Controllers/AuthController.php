@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public $statusCode = 500;
-    public $status = "error";
-    public $message = "";
-    public $data = null;
+    private $statusCode = 500;
+    private $status = "error";
+    private $message = "";
+    private $data = null;
 
 
     public function login(LoginRequest $request)

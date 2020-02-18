@@ -8,9 +8,19 @@ use App\Http\Resources\ReviewResource;
 use Illuminate\Http\Request;
 use App\Http\Requests\ReviewRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class ReviewController extends Controller
 {
+    private $statusCode = 500;
+    private $status = "error";
+    private $message = "";
+    private $data = null;
+
+    public function __construct() {
+        $this->middleware('auth:api')->except('index','show');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -20,16 +30,6 @@ class ReviewController extends Controller
     {
         $reviews =  Review::all()->where('product_id',$id);
         return ReviewResource::collection($reviews);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -47,9 +47,17 @@ class ReviewController extends Controller
         $review->product_id = $productId;
         $review->save();
 
+        $this->status = "success";
+        $this->message = "Add Review Success";
+        $this->statusCode = 201;
+        $this->data = new ReviewResource($review);
+
+
         return response([
-            'data' => new ReviewResource($review)
-        ], 201);
+            'status' => $this->status,
+            'message' => $this->message,
+            'data' => $this->data
+        ], $this->statusCode);
     }
 
     /**
@@ -58,20 +66,9 @@ class ReviewController extends Controller
      * @param  \App\Review  $review
      * @return \Illuminate\Http\Response
      */
-    public function show(Review $review)
+    public function show($prodId, Review $review)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Review  $review
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Review $review)
-    {
-        //
+        return new ReviewResource($review);
     }
 
     /**
@@ -81,14 +78,26 @@ class ReviewController extends Controller
      * @param  \App\Review  $review
      * @return \Illuminate\Http\Response
      */
-    public function update(ReviewRequest $request, $id)
+    public function update(ReviewRequest $request,$prodId, $reviewId)
     {
-        $review = Review::findOrFail($id);
-        $review->update($request->all());
+        $review = Review::findOrFail($reviewId);
 
-        return response([
-            'data' => new ReviewResource($review)
-        ], 200);
+        if(Gate::allows('updateDelete-reviews',$review)) {
+            
+            $review->update($request->all());
+    
+            $this->status = "success";
+            $this->message = "Update Review Success";
+            $this->statusCode = 200;
+            $this->data = new ReviewResource($review);
+    
+            return response([
+                'status' => $this->status,
+                'message' => $this->message,
+                'data' => $this->data
+            ], $this->statusCode);
+        }
+        abort(403, 'Access Forbidden');
     }
 
     /**
@@ -97,10 +106,17 @@ class ReviewController extends Controller
      * @param  \App\Review  $review
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Review $review)
+    public function destroy($prodId, $reviewId)
     {
-        $review->delete();
+        $review = Review::findOrFail($reviewId);
 
-        return response(null, 204);
+        if(Gate::allows('updateDelete-reviews',$review)) {
+            $review->delete();
+            $this->statusCode = 204;
+    
+            return response(null, $this->statusCode);
+        }
+        abort(403, 'Access Forbidden');
+
     }
 }

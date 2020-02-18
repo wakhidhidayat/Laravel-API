@@ -31,5 +31,9 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('manage-products', function($user) {
             return $user->role_id == 1;
         });
+
+        Gate::define('updateDelete-reviews', function(\App\User $user, \App\Review $review) {
+            return $user->id === $review->user_id;
+        });
     }
 }
