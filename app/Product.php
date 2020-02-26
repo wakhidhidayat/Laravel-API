@@ -10,6 +10,10 @@ class Product extends Model
         return $this->hasMany("App\Review");
     }
 
+    public function orders() {
+        return $this->belongsToMany("App\Order");
+    }
+
     protected $fillable = [
         'name','detail','discount','price','stock'
     ];
