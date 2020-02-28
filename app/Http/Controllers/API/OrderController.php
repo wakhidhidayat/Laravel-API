@@ -19,8 +19,10 @@ class OrderController extends Controller
      */
     public function index($userId)
     {
-        if(\Auth::id() != $userId) {
-            abort(403, 'Access Forbidden');
+        if(\Auth::user()->role_id == 2) {
+            if(\Auth::id() != $userId) {
+                abort(403, 'Access Forbidden');
+            }
         }
 
         return OrderCollection::collection(Order::where('user_id',$userId)->paginate(10));
@@ -61,8 +63,10 @@ class OrderController extends Controller
      */
     public function show($userId, $orderId)
     {
-        if(\Auth::id() != $userId) {
-            abort(403, 'Access Forbidden');
+        if(\Auth::user()->role_id == 2) {
+            if(\Auth::id() != $userId) {
+                abort(403, 'Access Forbidden');
+            }
         }
 
         $order = Order::findOrFail($orderId);
@@ -77,7 +81,7 @@ class OrderController extends Controller
      * @param  \App\Order  $order
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request,$userId, $orderId)
+    public function cancel(Request $request,$userId, $orderId)
     {
         if(\Auth::id() != $userId) {
             abort(403, 'Access Forbidden');
@@ -95,5 +99,29 @@ class OrderController extends Controller
     
             return new OrderResource($order);
         }
+    }
+
+    public function destroy($orderId)
+    {
+        if(\Auth::user()->role_id == 2) {
+            \abort(403, 'Access Forbidden');
+        }
+        
+        $order = Order::findOrFail($orderId);
+        $order->delete();
+
+        return response()->json(null, 204);
+    }
+
+    public function update(Request $request,$userId, $orderId)
+    {
+        if(\Auth::user()->role_id == 2) {
+            \abort(403, 'Access Forbidden');
+        }
+
+        $order = Order::findOrFail($orderId);
+        $order->update($request->all());
+
+        return new OrderResource($order);
     }
 }

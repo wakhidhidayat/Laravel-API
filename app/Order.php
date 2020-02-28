@@ -15,4 +15,8 @@ class Order extends Model
     {
         return $this->belongsToMany('App\Product');
     }
+
+    protected $fillable = [
+        'quantity','status'
+    ];
 }
