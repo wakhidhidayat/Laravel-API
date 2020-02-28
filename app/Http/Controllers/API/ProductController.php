@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\Controller;
 use App\Product;
 use Illuminate\Http\Request;
 use App\Http\Resources\Product\ProductResource;
@@ -11,11 +12,6 @@ use Illuminate\Support\Facades\Gate;
 
 class ProductController extends Controller
 {
-    private $statusCode = 500;
-    private $status = "error";
-    private $message = "";
-    private $data = null;
-
     /**
      * Display a listing of the resource.
      *
@@ -23,7 +19,6 @@ class ProductController extends Controller
      */
 
     public function __construct() {
-        $this->middleware('auth:api')->except('index','show');
         
         $this->middleware(function($request, $next) {
             if(Gate::allows('manage-products')) return $next($request);
@@ -52,16 +47,9 @@ class ProductController extends Controller
         $product->discount = $request->discount;
         $product->save();
 
-        $this->status = "success";
-        $this->message = "Add Product Success";
-        $this->data = new ProductResource($product);
-        $this->statusCode = 201;
-
         return response()->json([
-            'status' => $this->status,
-            'message' => $this->message,
-            'data' => $this->data
-        ], $this->statusCode);
+            'data' => new ProductResource($product)
+        ], 201);
     }
 
     /**
@@ -70,8 +58,9 @@ class ProductController extends Controller
      * @param  \App\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function show(Product $product)
+    public function show($productId)
     {
+        $product = Product::findOrFail($productId);
         return new ProductResource($product);
     }
 
@@ -88,16 +77,9 @@ class ProductController extends Controller
         unset($request['description']);
         $product->update($request->all());
 
-        $this->status = "success";
-        $this->data = new ProductResource($product);
-        $this->message = "Update Product Success";
-        $this->statusCode = 200;
-
         return response()->json([
-            'status' => $this->status,
-            'message' => $this->message,
-            'data' => $this->data,
-        ], $this->statusCode);
+            'data' => new ProductResource($product),
+        ], 200);
     }
 
     /**
@@ -109,13 +91,7 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $product->delete();
-        $this->status = "success";
-        $this->message = "Delete Product Success";
-        $this->statusCode = 204;
 
-        return response()->json([
-            "status" => $this->status,
-            "message" => $this->message
-        ], $this->statusCode);
+        return response()->json(null, 204);
     }
 }

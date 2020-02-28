@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\API;
 
+use App\Http\Controllers\Controller;
 use App\Review;
 use App\Product;
 use App\Http\Resources\ReviewResource;
@@ -12,11 +13,6 @@ use Illuminate\Support\Facades\Gate;
 
 class ReviewController extends Controller
 {
-    private $statusCode = 500;
-    private $status = "error";
-    private $message = "";
-    private $data = null;
-
     public function __construct() {
         $this->middleware('auth:api')->except('index','show');
     }
@@ -47,17 +43,9 @@ class ReviewController extends Controller
         $review->product_id = $productId;
         $review->save();
 
-        $this->status = "success";
-        $this->message = "Add Review Success";
-        $this->statusCode = 201;
-        $this->data = new ReviewResource($review);
-
-
         return response([
-            'status' => $this->status,
-            'message' => $this->message,
-            'data' => $this->data
-        ], $this->statusCode);
+            'data' => new ReviewResource($review)
+        ], 201);
     }
 
     /**
@@ -86,16 +74,9 @@ class ReviewController extends Controller
             
             $review->update($request->all());
     
-            $this->status = "success";
-            $this->message = "Update Review Success";
-            $this->statusCode = 200;
-            $this->data = new ReviewResource($review);
-    
             return response([
-                'status' => $this->status,
-                'message' => $this->message,
-                'data' => $this->data
-            ], $this->statusCode);
+                'data' => new ReviewResource($review)
+            ], 200);
         }
         abort(403, 'Access Forbidden');
     }
