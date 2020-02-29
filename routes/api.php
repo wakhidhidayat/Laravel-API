@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-
 // Admin Routes
 Route::group(['prefix' => '/v1/admin', 'middleware' => 'auth:api'], function() {
     Route::apiResource('/products', 'API\ProductController');

@@ -36,6 +36,13 @@ class ReviewController extends Controller
      */
     public function store(ReviewRequest $request, $productId)
     {
+        $product = Product::findOrFail($productId);
+        $ordered = $product->orders->where('user_id', \Auth::id())->first();
+
+        if(!$ordered) {
+            \abort(400, 'You haven\'t order this product');
+        }
+
         $review = new Review;
         $review->review = $request->review;
         $review->star = $request->star;

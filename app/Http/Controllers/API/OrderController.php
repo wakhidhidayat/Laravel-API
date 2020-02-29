@@ -39,12 +39,17 @@ class OrderController extends Controller
     {
         $product = \App\Product::findOrFail($productId);
 
+        if($request->quantity > $product->stock) {
+            \abort(400, 'Your orders more than products stock');
+        }
         $order = new Order;
         $order->user_id = \Auth::user()->id;
         $order->quantity = $request->quantity;
         $order->total_price = $request->quantity * $product->price;
         $order->status = "PACKING";
+        $product->stock -= $request->quantity;
         $order->save();
+        $product->save();
 
         
         $order->products()->attach($productId);
