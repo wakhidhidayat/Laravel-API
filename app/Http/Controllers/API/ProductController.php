@@ -44,7 +44,11 @@ class ProductController extends Controller
         $product->stock = $request->stock;
         $product->price = $request->price;
         $product->detail = $request->detail;
-        $product->discount = $request->discount;
+        if($request->discount) {
+            $product->discount = $request->discount;
+        } else {
+            $product->discount = 0;
+        }
         $product->save();
 
         return response()->json([

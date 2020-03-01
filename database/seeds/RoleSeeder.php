@@ -14,5 +14,9 @@ class RoleSeeder extends Seeder
         $adminRole = new \App\Role;
         $adminRole->name = "ADMIN";
         $adminRole->save();
+
+        $customer = new \App\Role;
+        $customer->name = "CUSTOMER";
+        $customer->save();
     }
 }

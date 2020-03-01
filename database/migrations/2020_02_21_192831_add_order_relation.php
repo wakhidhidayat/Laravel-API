@@ -15,7 +15,6 @@ class AddOrderRelation extends Migration
     {
         Schema::table('orders', function (Blueprint $table) {
             $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('product_id')->references('id')->on('products');
         });
     }
 
@@ -27,7 +26,7 @@ class AddOrderRelation extends Migration
     public function down()
     {
         Schema::table('orders', function (Blueprint $table) {
-            //
+            $table->dropForeign(['user_id']);
         });
     }
 }

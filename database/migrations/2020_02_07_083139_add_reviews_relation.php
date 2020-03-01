@@ -27,7 +27,8 @@ class AddReviewsRelation extends Migration
     public function down()
     {
         Schema::table('reviews', function (Blueprint $table) {
-            //
+            $table->dropForeign(['user_id']);
+            $table->dropForeign(['product_id']);
         });
     }
 }

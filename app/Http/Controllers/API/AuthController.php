@@ -23,7 +23,7 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->firstOrFail();
         if($user) {
             if(\Hash::check($request->password, $user->password)) {
-                $this->data['token'] = $user->createToken('nApp')->accessToken;
+                $this->data['token'] = $user->createToken('eApp')->accessToken;
                 $this->data['name'] = $user->name;
                 $this->status = "success";
                 $this->message = "Login success";
@@ -53,10 +53,11 @@ class AuthController extends Controller
         $user->role_id = 2;
         $user->save();
 
-        $this->data['token'] = $user->createToken('nApp')->accessToken;
+        $this->data['token'] = $user->createToken('eApp')->accessToken;
         $this->data['name'] = $user->name;
-        $this->status = 201;
+        $this->status = "Success";
         $this->message = "Register Success";
+        $this->statusCode = 201;
 
         return response()->json([
             'status' => $this->status,
@@ -77,7 +78,6 @@ class AuthController extends Controller
         return response()->json([
             'status' => $this->status,
             'message' => $this->message,
-
         ], $this->statusCode);
     }
 }

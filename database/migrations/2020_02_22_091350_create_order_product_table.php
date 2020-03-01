@@ -17,7 +17,6 @@ class CreateOrderProductTable extends Migration
             $table->bigIncrements('id');
             $table->bigInteger('product_id')->unsigned();
             $table->bigInteger('order_id')->unsigned();
-            $table->timestamps();
 
             $table->foreign('product_id')->references('id')->on('products');
             $table->foreign('order_id')->references('id')->on('orders');
